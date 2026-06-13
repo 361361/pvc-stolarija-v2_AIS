@@ -1,0 +1,21 @@
+@model PvcStolarija.DAL.Models.Reklamacija
+@using PvcStolarija.DAL.Models
+@{ ViewData["Title"] = "Obriši Reklamaciju"; var kupac=Model.KupacReklamacije.FirstOrDefault()?.Kupac; }
+<div><div class="row justify-content-center"><div class="col-lg-8">
+    <div class="card shadow-sm border-danger"><div class="card-header bg-danger text-white"><h4 class="mb-0">⚠️ Potvrda Brisanja</h4></div>
+    <div class="card-body">
+        <div class="alert alert-warning"><strong>Upozorenje!</strong> Da li ste sigurni da želite obrisati ovu reklamaciju? Ova akcija je <strong>nepovratna</strong>.</div>
+        <div class="card bg-light mb-4"><div class="card-body">
+            <h5 class="mb-3">Podaci o reklamaciji:</h5>
+            <div class="row mb-2"><div class="col-md-4"><strong>ID:</strong></div><div class="col-md-8">@Model.Id</div></div>
+            <div class="row mb-2"><div class="col-md-4"><strong>Datum:</strong></div><div class="col-md-8">@Model.Datum.ToString("dd.MM.yyyy")</div></div>
+            <div class="row mb-2"><div class="col-md-4"><strong>Tip:</strong></div><div class="col-md-8"><span class="badge @(Model.TipReklamacije==TipReklamacije.Pisana?"bg-info":"bg-warning text-dark")">@Model.TipReklamacije</span></div></div>
+            <div class="row mb-2"><div class="col-md-4"><strong>Prioritet:</strong></div><div class="col-md-8"><span class="@(Model.Resena?"text-success":"text-danger") fw-bold">@Model.Prioritet/100</span></div></div>
+            <div class="row mb-2"><div class="col-md-4"><strong>Kupac:</strong></div><div class="col-md-8">@(kupac!=null?$"{kupac.Ime} {kupac.Prezime}":"N/A")</div></div>
+            <div class="row"><div class="col-md-4"><strong>Radnik:</strong></div><div class="col-md-8">@(Model.Radnik!=null?$"{Model.Radnik.Ime} {Model.Radnik.Prezime}":"N/A")</div></div>
+        </div></div>
+        <form asp-action="Delete" method="post"><input type="hidden" asp-for="Id" />
+            <div class="d-flex gap-2"><button type="submit" class="btn btn-danger">Da, obriši</button><a asp-action="Index" class="btn btn-secondary">Ne, otkaži</a></div>
+        </form>
+    </div></div>
+</div></div></div>

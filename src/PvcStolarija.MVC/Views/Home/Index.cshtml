@@ -1,0 +1,88 @@
+@{
+    ViewData["Title"] = "Početna";
+}
+
+<div class="page-header">
+    <div>
+        <h1><i class="bi bi-house-fill me-2"></i>PVC Stolarija — Sistem za upravljanje</h1>
+        <small class="opacity-75">Dobrodošli u aplikaciju za upravljanje radnicima, kupcima, proizvodima i reklamacijama</small>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="stat-card h-100 text-decoration-none d-block">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="stat-icon text-success"><i class="bi bi-person-badge"></i></span>
+                <div>
+                    <div class="stat-title">Zaposleni</div>
+                    <div class="stat-value">Radnici</div>
+                </div>
+            </div>
+            <p class="text-muted small mb-3">Pregled i upravljanje zaposlenima — ugovori, iskustvo, kontakt podaci.</p>
+            <a asp-controller="Radnik" asp-action="Index" class="btn btn-success btn-sm w-100">
+                <i class="bi bi-arrow-right-circle me-1"></i>Pogledaj
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="stat-icon text-primary"><i class="bi bi-people"></i></span>
+                <div>
+                    <div class="stat-title">Klijenti</div>
+                    <div class="stat-value">Kupci</div>
+                </div>
+            </div>
+            <p class="text-muted small mb-3">Registrovani kupci PVC stolarije — istorija narudžbi i reklamacija.</p>
+            <a asp-controller="Kupac" asp-action="Index" class="btn btn-success btn-sm w-100">
+                <i class="bi bi-arrow-right-circle me-1"></i>Pogledaj
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="stat-icon text-warning"><i class="bi bi-grid"></i></span>
+                <div>
+                    <div class="stat-title">Katalog</div>
+                    <div class="stat-value">Proizvodi</div>
+                </div>
+            </div>
+            <p class="text-muted small mb-3">PVC prozori, vrata, roletne — upravljanje katalogom i slikama.</p>
+            <a asp-controller="Proizvod" asp-action="Index" class="btn btn-success btn-sm w-100">
+                <i class="bi bi-arrow-right-circle me-1"></i>Pogledaj
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="stat-icon text-info"><i class="bi bi-box-seam"></i></span>
+                <div>
+                    <div class="stat-title">Prodaja</div>
+                    <div class="stat-value">Narudžbe</div>
+                </div>
+            </div>
+            <p class="text-muted small mb-3">Praćenje narudžbi — tip, datum, odgovorni radnik i kupci.</p>
+            <a asp-controller="Narudzba" asp-action="Index" class="btn btn-success btn-sm w-100">
+                <i class="bi bi-arrow-right-circle me-1"></i>Pogledaj
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="stat-icon text-danger"><i class="bi bi-exclamation-triangle"></i></span>
+                <div>
+                    <div class="stat-title">Servis</div>
+                    <div class="stat-value">Reklamacije</div>
+                </div>
+            </div>
+            <p class="text-muted small mb-3">Evidencija reklamacija — pisane i terenske, status rešavanja.</p>
+            <a asp-controller="Reklamacija" asp-action="Index" class="btn btn-success btn-sm w-100">
+                <i class="bi bi-arrow-right-circle me-1"></i>Pogledaj
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,136 @@
+@model PvcStolarija.MVC.ViewModels.RegisterViewModel
+@{ ViewData["Title"] = "Kreiraj Novog Korisnika"; }
+
+<div class="page-header">
+    <h2><i class="bi bi-person-plus-fill me-2"></i>Kreiraj Novog Korisnika</h2>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+                    <!-- Tip korisnika -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold"><i class="bi bi-people me-1"></i>Tip Korisnika</label>
+                        <div class="d-flex gap-2">
+                            <input type="radio" class="btn-check" name="userType" id="typeAdmin" value="admin" checked />
+                            <label class="btn btn-outline-success w-50" for="typeAdmin">
+                                <i class="bi bi-shield-check me-1"></i>Administrator
+                            </label>
+                            <input type="radio" class="btn-check" name="userType" id="typeKupac" value="kupac" />
+                            <label class="btn btn-outline-primary w-50" for="typeKupac">
+                                <i class="bi bi-person me-1"></i>Kupac
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Osnovni podaci -->
+                    <h6 class="fw-semibold mb-3"><i class="bi bi-info-circle me-1"></i>Osnovni Podaci</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Ime" class="form-label">Ime</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="Ime" class="form-control" placeholder="Unesite ime" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Prezime" class="form-label">Prezime</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="Prezime" class="form-control" placeholder="Unesite prezime" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Podaci za prijavu -->
+                    <h6 class="fw-semibold mb-3"><i class="bi bi-lock me-1"></i>Podaci za Prijavu</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Username" class="form-label">Korisničko ime</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-at"></i></span>
+                                <input asp-for="Username" class="form-control" placeholder="Korisničko ime" />
+                            </div>
+                            <small class="text-muted">Korisničko ime za prijavu u sistem</small>
+                            <span asp-validation-for="Username" class="text-danger small d-block"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Email" class="form-control" type="email" placeholder="primer@email.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small d-block"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label">Lozinka</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
+                            </div>
+                            <small class="text-muted">Minimum 6 karaktera</small>
+                            <span asp-validation-for="Password" class="text-danger small d-block"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmPassword" class="form-label">Potvrdi lozinku</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" />
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small d-block"></span>
+                        </div>
+                    </div>
+
+                    <!-- Kupac sekcija -->
+                    <div id="kupacSection" class="d-none">
+                        <hr />
+                        <h6 class="fw-semibold mb-3"><i class="bi bi-person-lines-fill me-1"></i>Poveži sa Kupcem</h6>
+                        <div class="mb-3">
+                            <label asp-for="KupacId" class="form-label">Kupac</label>
+                            <select asp-for="KupacId" class="form-select">
+                                <option value="">-- Izaberi kupca --</option>
+                                @if (ViewBag.Kupci != null) {
+                                    @foreach (var k in ViewBag.Kupci) {
+                                        <option value="@k.Id">@k.Ime @k.Prezime (@k.JMBG)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-person-check me-1"></i>Kreiraj Korisnika
+                        </button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x me-1"></i>Otkaži
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        document.querySelectorAll('input[name="userType"]').forEach(r => {
+            r.addEventListener('change', function () {
+                document.getElementById('kupacSection').classList.toggle('d-none', this.value !== 'kupac');
+                if (this.value !== 'kupac') {
+                    document.getElementById('KupacId').value = '';
+                }
+            });
+        });
+    </script>
+}

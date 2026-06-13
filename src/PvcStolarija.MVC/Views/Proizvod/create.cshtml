@@ -1,0 +1,44 @@
+@model PvcStolarija.DAL.Models.Proizvod
+@using PvcStolarija.DAL.Models
+@{ ViewData["Title"] = "Dodaj Proizvod"; }
+<div>
+    <div class="page-header mb-4"><h2>Dodaj Novi Proizvod</h1><hr />
+    <div class="row"><div class="col-md-8">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label asp-for="Naziv" class="form-label">Naziv *</label><input asp-for="Naziv" class="form-control" placeholder="Npr. PVC Prozor" /></div>
+                <div class="col-md-6 mb-3"><label asp-for="Model" class="form-label">Model *</label><input asp-for="Model" class="form-control" placeholder="Npr. Jednokrilni 60x90" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label asp-for="Sifra" class="form-label">Šifra *</label><input asp-for="Sifra" class="form-control" placeholder="Npr. PRZ-001" maxlength="20" /></div>
+                <div class="col-md-6 mb-3"><label asp-for="GodinaProizvodnje" class="form-label">Godina Proizvodnje</label><input asp-for="GodinaProizvodnje" class="form-control" type="number" min="1990" max="@DateTime.Now.Year" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label asp-for="TipMaterijala" class="form-label">Tip Materijala *</label>
+                    <select asp-for="TipMaterijala" class="form-control" asp-items="Html.GetEnumSelectList<TipMaterijala>()"><option value="">-- Izaberi --</option></select></div>
+                <div class="col-md-6 mb-3"><label asp-for="Dostupnost" class="form-label">Dostupnost *</label>
+                    <select asp-for="Dostupnost" class="form-control" asp-items="Html.GetEnumSelectList<Dostupnost>()"><option value="">-- Izaberi --</option></select></div>
+            </div>
+            <hr /><h5 class="mb-3">Slike Proizvoda</h5>
+            <div id="slikeContainer">
+                <div class="slika-row mb-3"><div class="row">
+                    <div class="col-md-6"><label class="form-label">Slika</label><input type="file" name="slike" class="form-control" accept="image/*" onchange="previewImage(this)" /></div>
+                    <div class="col-md-5"><label class="form-label">Opis (opciono)</label><input type="text" name="opisiSlika" class="form-control" placeholder="Npr. Prednja strana" /></div>
+                    <div class="col-md-1 d-flex align-items-end"><button type="button" class="btn btn-danger btn-sm" onclick="removeImageRow(this)" style="display:none;">✕</button></div>
+                </div>
+                <div class="row mt-2"><div class="col-12"><img class="preview-img img-thumbnail" style="max-width:200px;max-height:200px;display:none;" /></div></div></div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm mb-3" onclick="addImageRow()">+ Dodaj Još Slika</button>
+            <div class="mt-4"><button type="submit" class="btn btn-success">Sačuvaj</button> <a asp-action="Index" class="btn btn-secondary">Nazad</a></div>
+        </form>
+    </div>
+    <div class="col-md-4"><div class="alert alert-info"><h5>Napomena:</h5><ul><li>Polja * su obavezna</li><li>Možete dodati više slika</li><li>Max veličina po slici: 5MB</li></ul></div></div>
+    </div>
+</div>
+@section Scripts { @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+function addImageRow(){const c=document.getElementById('slikeContainer');const n=document.querySelector('.slika-row').cloneNode(true);n.querySelector('input[type="file"]').value='';n.querySelector('input[type="text"]').value='';n.querySelector('.preview-img').style.display='none';n.querySelector('.btn-danger').style.display='block';c.appendChild(n);}
+function removeImageRow(b){b.closest('.slika-row').remove();}
+function previewImage(i){const p=i.closest('.slika-row').querySelector('.preview-img');if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{p.src=e.target.result;p.style.display='block'};r.readAsDataURL(i.files[0]);}}
+</script> }

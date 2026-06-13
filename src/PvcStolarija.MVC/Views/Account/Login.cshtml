@@ -1,0 +1,45 @@
+@model PvcStolarija.MVC.ViewModels.LoginViewModel
+@{ ViewData["Title"] = "Prijava"; Layout = "_Layout"; }
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-lock-fill me-2"></i>Prijava u sistem</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label fw-semibold">Korisničko ime</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input asp-for="Username" class="form-control" placeholder="Unesite korisničko ime" autofocus />
+                        </div>
+                        <span asp-validation-for="Username" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold">Lozinka</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-key"></i></span>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="Unesite lozinku" />
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input asp-for="RememberMe" class="form-check-input" />
+                            <label asp-for="RememberMe" class="form-check-label">Zapamti me</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Prijavi se
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

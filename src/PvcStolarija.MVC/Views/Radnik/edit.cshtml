@@ -1,0 +1,32 @@
+@model PvcStolarija.DAL.Models.Radnik
+@{ ViewData["Title"] = "Izmeni Radnika"; }
+<div>
+    <div class="page-header mb-4"><h2>Izmeni Radnika</h1><hr />
+    <div class="row"><div class="col-md-8">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="Id" /><input type="hidden" asp-for="ProfilnaSlika" />
+            <div class="row">
+                <div class="col-md-6 mb-3"><label asp-for="Ime" class="form-label">Ime *</label><input asp-for="Ime" class="form-control" /></div>
+                <div class="col-md-6 mb-3"><label asp-for="Prezime" class="form-label">Prezime *</label><input asp-for="Prezime" class="form-control" /></div>
+            </div>
+            <div class="mb-3"><label asp-for="JMBG" class="form-label">JMBG *</label><input asp-for="JMBG" class="form-control" maxlength="13" /></div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label asp-for="BrojUgovora" class="form-label">Broj Ugovora</label><input asp-for="BrojUgovora" class="form-control" /></div>
+                <div class="col-md-6 mb-3"><label asp-for="GodineRadnogIskustva" class="form-label">God. Iskustva *</label><input asp-for="GodineRadnogIskustva" class="form-control" type="number" min="0" max="50" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label asp-for="Telefon" class="form-label">Telefon</label><input asp-for="Telefon" class="form-control" /></div>
+                <div class="col-md-6 mb-3"><label asp-for="Email" class="form-label">Email</label><input asp-for="Email" class="form-control" type="email" /></div>
+            </div>
+            <div class="mb-3"><label class="form-label">Trenutna Slika</label>
+                @if (!string.IsNullOrEmpty(Model.ProfilnaSlika)) { <div><img src="@Model.ProfilnaSlika" class="img-thumbnail" style="max-width:200px;max-height:200px;" /></div> }
+                else { <p class="text-muted">Nema slike</p> }
+            </div>
+            <div class="mb-3"><label for="profilnaSlika" class="form-label">Nova Slika</label><input type="file" name="profilnaSlika" class="form-control" accept="image/*" onchange="previewImage(event)" /><small class="text-muted">Ostavite prazno ako ne menjate sliku</small></div>
+            <div class="mb-3"><img id="imagePreview" src="#" style="max-width:200px;max-height:200px;display:none;" class="img-thumbnail" /></div>
+            <div class="mt-4"><button type="submit" class="btn btn-success">Sačuvaj Izmene</button> <a asp-action="Index" class="btn btn-secondary">Nazad</a></div>
+        </form>
+    </div></div>
+</div>
+@section Scripts { @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} <script>function previewImage(e){var r=new FileReader();r.onload=function(){var o=document.getElementById('imagePreview');o.src=r.result;o.style.display='block'};r.readAsDataURL(e.target.files[0])}</script> }

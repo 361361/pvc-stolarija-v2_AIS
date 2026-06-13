@@ -1,0 +1,37 @@
+@model PvcStolarija.DAL.Models.Narudzba
+@using PvcStolarija.DAL.Models
+@{ ViewData["Title"] = "Detalji Narudžbe"; }
+<div>
+    <div class="page-header mb-4"><h2>Detalji Narudžbe #@Model.BrojNarudzbe</h1><hr />
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-3"><div class="card-header bg-primary text-white"><h5 class="mb-0">Osnovne Informacije</h5></div>
+            <div class="card-body"><dl class="row">
+                <dt class="col-sm-4">Broj Narudžbe</dt><dd class="col-sm-8"><span class="badge bg-primary fs-6">Narudžba #@Model.BrojNarudzbe</span></dd>
+                <dt class="col-sm-4">Tip</dt><dd class="col-sm-8">@if(Model.TipNarudzbe==TipNarudzbe.Online){<span class="badge bg-info">Online</span>}else{<span class="badge bg-success">Lično</span>}</dd>
+                <dt class="col-sm-4">Datum</dt><dd class="col-sm-8">@(Model.Datum.HasValue ? Model.Datum.Value.ToString("dd.MM.yyyy") : "Nije zakazan")</dd>
+                <dt class="col-sm-4">Radnik</dt><dd class="col-sm-8">@(Model.Radnik != null ? $"{Model.Radnik.Ime} {Model.Radnik.Prezime}" : "-")</dd>
+                <dt class="col-sm-4">Proizvod</dt><dd class="col-sm-8">@(Model.Proizvod != null ? Model.Proizvod.NazivProizvoda : "-")</dd>
+            </dl></div></div>
+            <div class="card mt-3"><div class="card-header bg-warning"><h5 class="mb-0">Kupci na Narudžbi (@(Model.KupacNarudzbine?.Count ?? 0))</h5></div>
+            <div class="card-body">
+                @if(Model.KupacNarudzbine?.Any()==true){
+                <table class="table table-sm table-hover mb-0"><thead><tr><th>Kupac</th><th>Potvrđeno</th><th>Napomena</th></tr></thead><tbody>
+                    @foreach(var kn in Model.KupacNarudzbine){
+                    <tr>
+                        <td>@kn.Kupac.Ime @kn.Kupac.Prezime</td>
+                        <td>@if(kn.Potvrdjen){<span class="badge bg-success">✓ Da</span>}else{<span class="badge bg-danger">✗ Ne</span>}</td>
+                        <td>@(string.IsNullOrEmpty(kn.Napomena)?"-":kn.Napomena)</td>
+                    </tr>
+                    }
+                </tbody></table>
+                } else { <p class="text-muted mb-0">Nema kupaca.</p> }
+            </div></div>
+        </div>
+    </div>
+    <div class="mt-4">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Izmeni</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Obriši</a>
+        <a asp-action="Index" class="btn btn-secondary">Nazad</a>
+    </div>
+</div>

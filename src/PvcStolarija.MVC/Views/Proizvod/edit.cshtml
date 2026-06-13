@@ -1,0 +1,58 @@
+@model PvcStolarija.DAL.Models.Proizvod
+@using PvcStolarija.DAL.Models
+@{ ViewData["Title"] = "Izmeni Proizvod"; }
+<div>
+    <div class="page-header mb-4"><h2>Izmeni Proizvod</h1><hr />
+    <div class="row"><div class="col-md-8">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="row">
+                <div class="col-md-6 mb-3"><label asp-for="Naziv" class="form-label">Naziv *</label><input asp-for="Naziv" class="form-control" /></div>
+                <div class="col-md-6 mb-3"><label asp-for="Model" class="form-label">Model *</label><input asp-for="Model" class="form-control" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label asp-for="Sifra" class="form-label">Šifra *</label><input asp-for="Sifra" class="form-control" maxlength="20" /></div>
+                <div class="col-md-6 mb-3"><label asp-for="GodinaProizvodnje" class="form-label">Godina</label><input asp-for="GodinaProizvodnje" class="form-control" type="number" /></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label asp-for="TipMaterijala" class="form-label">Tip Materijala *</label>
+                    <select asp-for="TipMaterijala" class="form-control" asp-items="Html.GetEnumSelectList<TipMaterijala>()"></select></div>
+                <div class="col-md-6 mb-3"><label asp-for="Dostupnost" class="form-label">Dostupnost *</label>
+                    <select asp-for="Dostupnost" class="form-control" asp-items="Html.GetEnumSelectList<Dostupnost>()"></select></div>
+            </div>
+            <hr /><h5>Postojeće Slike</h5>
+            @if (Model.Slike?.Any() == true) {
+                <div class="row mb-3">
+                    @foreach (var s in Model.Slike) {
+                    <div class="col-md-3 mb-3" id="slika-@s.Id"><div class="card">
+                        <img src="@s.PutanjaDoSlike" class="card-img-top" style="height:150px;object-fit:cover;" />
+                        <div class="card-body p-2">
+                            @if (!string.IsNullOrEmpty(s.Opis)) { <p class="card-text small mb-1">@s.Opis</p> }
+                            <button type="button" class="btn btn-danger btn-sm w-100" onclick="deleteImage(@s.Id)">Obriši</button>
+                        </div>
+                    </div></div>
+                    }
+                </div>
+            } else { <p class="text-muted">Nema slika.</p> }
+            <hr /><h5 class="mb-3">Dodaj Nove Slike</h5>
+            <div id="noveSlikeContainer">
+                <div class="slika-row mb-3"><div class="row">
+                    <div class="col-md-6"><input type="file" name="noveSlike" class="form-control" accept="image/*" onchange="previewImage(this)" /></div>
+                    <div class="col-md-5"><input type="text" name="opisiNovihSlika" class="form-control" placeholder="Opis (opciono)" /></div>
+                    <div class="col-md-1 d-flex align-items-end"><button type="button" class="btn btn-danger btn-sm" onclick="removeImageRow(this)" style="display:none;">✕</button></div>
+                </div>
+                <div class="row mt-2"><div class="col-12"><img class="preview-img img-thumbnail" style="max-width:200px;max-height:200px;display:none;" /></div></div></div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm mb-3" onclick="addImageRow()">+ Dodaj Još Slika</button>
+            <div class="mt-4"><button type="submit" class="btn btn-success">Sačuvaj Izmene</button> <a asp-action="Index" class="btn btn-secondary">Nazad</a></div>
+        </form>
+    </div></div>
+</div>
+@section Scripts { @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+function addImageRow(){const c=document.getElementById('noveSlikeContainer');const n=document.querySelector('.slika-row').cloneNode(true);n.querySelector('input[type="file"]').value='';n.querySelector('input[type="text"]').value='';n.querySelector('.preview-img').style.display='none';n.querySelector('.btn-danger').style.display='block';c.appendChild(n);}
+function removeImageRow(b){b.closest('.slika-row').remove();}
+function previewImage(i){const p=i.closest('.slika-row').querySelector('.preview-img');if(i.files&&i.files[0]){const r=new FileReader();r.onload=e=>{p.src=e.target.result;p.style.display='block'};r.readAsDataURL(i.files[0]);}}
+function deleteImage(id){if(!confirm('Obrisati sliku?'))return;fetch('/Proizvod/DeleteImage/'+id,{method:'POST'}).then(r=>r.json()).then(d=>{if(d.success)document.getElementById('slika-'+id).remove();else alert('Greška: '+d.message);});}
+</script> }
