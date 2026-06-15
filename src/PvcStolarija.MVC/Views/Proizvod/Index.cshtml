@@ -1,42 +1,66 @@
-@model IEnumerable<PvcStolarija.DAL.Models.Proizvod>
+@model IEnumerable<PvcStolarija.MVC.ViewModels.Proizvod.ProizvodViewModel>
 @using PvcStolarija.DAL.Models
 @{ ViewData["Title"] = "Lista Proizvoda"; }
 
-    <h1 class="mb-4">Lista Proizvoda</h1>
-    <p><a asp-action="Create" class="btn btn-primary">Dodaj Novi Proizvod</a></p>
-    <table class="table table-striped table-hover"><thead class="table-dark">
-        <tr><th>Slike</th><th>Naziv</th><th>Model</th><th>Šifra</th><th>Godina</th><th>Tip Materijala</th><th>Dostupnost</th><th>Akcije</th></tr>
-    </thead><tbody>
-        @if (Model.Any()) {
-            @foreach (var p in Model) {
-            <tr>
-                <td>
-                    @if (p.Slike?.Any() == true) {
-                        <img src="@p.Slike.First().PutanjaDoSlike" class="img-thumbnail" style="width:60px;height:60px;object-fit:cover;" />
-                        @if (p.Slike.Count > 1) { <span class="badge bg-info">+@(p.Slike.Count-1)</span> }
-                    } else { <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width:60px;height:60px;">🪟</div> }
-                </td>
-                <td>@p.Naziv</td><td>@p.Model</td>
-                <td><span class="badge bg-primary">@p.Sifra</span></td>
-                <td>@p.GodinaProizvodnje</td>
-                <td>
-                    @switch(p.TipMaterijala) {
-                        case TipMaterijala.PVC: <span class="badge bg-primary">PVC</span> break;
-                        case TipMaterijala.Aluminijum: <span class="badge bg-dark">Aluminijum</span> break;
-                        case TipMaterijala.Drvo: <span class="badge bg-warning text-dark">Drvo</span> break;
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-grid me-2"></i>Lista Proizvoda</h2>
+        <small class="opacity-75">Ukupno: @Model.Count() proizvoda</small>
+    </div>
+    <a asp-action="Create" class="btn btn-light btn-sm"><i class="bi bi-plus-circle me-1"></i>Dodaj Proizvod</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr><th>Slika</th><th>Naziv</th><th>Model</th><th>Šifra</th><th>Materijal</th><th>Dostupnost</th><th>Akcije</th></tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="7" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-4 d-block mb-2"></i>Nema proizvoda u bazi.</td></tr>
                     }
-                </td>
-                <td>
-                    @if (p.Dostupnost == Dostupnost.Dostupan) { <span class="badge bg-success">Dostupan</span> }
-                    else { <span class="badge bg-danger">Nedostupan</span> }
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@p.Id" class="btn btn-info btn-sm">Detalji</a>
-                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-warning btn-sm">Izmeni</a>
-                    <a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-danger btn-sm">Obriši</a>
-                </td>
-            </tr>
-            }
-        } else { <tr><td colspan="8" class="text-center"><em>Nema proizvoda u bazi.</em></td></tr> }
-    </tbody></table>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (p.Slike.Any())
+                                {
+                                    <img src="@p.Slike.First().PutanjaDoSlike" class="rounded" style="width:50px;height:50px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div class="avatar-initials" style="font-size:.9rem;">🪟</div>
+                                }
+                            </td>
+                            <td class="fw-semibold">@p.Naziv</td>
+                            <td>@p.Model</td>
+                            <td><span class="badge bg-primary">@p.Sifra</span></td>
+                            <td>
+                                @switch (p.TipMaterijala)
+                                {
+                                    case TipMaterijala.PVC: <span class="badge bg-primary">PVC</span> break;
+                                    case TipMaterijala.Aluminijum: <span class="badge bg-dark">Aluminijum</span> break;
+                                    case TipMaterijala.Drvo: <span class="badge bg-warning text-dark">Drvo</span> break;
+                                }
+                            </td>
+                            <td>
+                                @if (p.Dostupnost == Dostupnost.Dostupan)
+                                { <span class="badge bg-success">Dostupan</span> }
+                                else
+                                { <span class="badge bg-danger">Nedostupan</span> }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@p.Id" class="btn btn-outline-info btn-sm"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit"    asp-route-id="@p.Id" class="btn btn-outline-warning btn-sm"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="Delete"  asp-route-id="@p.Id" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

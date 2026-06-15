@@ -1,4 +1,4 @@
-@model IEnumerable<PvcStolarija.DAL.Models.Radnik>
+@model IEnumerable<PvcStolarija.MVC.ViewModels.Radnik.RadnikViewModel>
 @{ ViewData["Title"] = "Lista Radnika"; }
 
 <div class="page-header">
@@ -23,30 +23,37 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (!Model.Any()) {
-                        <tr><td colspan="8" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-4 d-block mb-2"></i>Nema radnika u bazi.</td></tr>
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox fs-4 d-block mb-2"></i>Nema radnika u bazi.
+                        </td></tr>
                     }
-                    @foreach (var r in Model) {
-                    <tr>
-                        <td>
-                            @if (!string.IsNullOrEmpty(r.ProfilnaSlika)) {
-                                <img src="@r.ProfilnaSlika" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;" />
-                            } else {
-                                <div class="avatar-initials">@r.Ime.Substring(0,1)@r.Prezime.Substring(0,1)</div>
-                            }
-                        </td>
-                        <td class="fw-semibold">@r.Ime @r.Prezime</td>
-                        <td><code>@r.JMBG</code></td>
-                        <td>@(string.IsNullOrEmpty(r.BrojUgovora) ? "<span class='text-muted'>—</span>" : r.BrojUgovora)</td>
-                        <td><span class="badge bg-success">@r.GodineRadnogIskustva god.</span></td>
-                        <td>@r.Telefon</td>
-                        <td>@r.Email</td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-outline-info btn-sm"><i class="bi bi-eye"></i></a>
-                            <a asp-action="Edit" asp-route-id="@r.Id" class="btn btn-outline-warning btn-sm"><i class="bi bi-pencil"></i></a>
-                            <a asp-action="Delete" asp-route-id="@r.Id" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></a>
-                        </td>
-                    </tr>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(r.ProfilnaSlika))
+                                {
+                                    <img src="@r.ProfilnaSlika" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div class="avatar-initials">@r.Ime.Substring(0,1)@r.Prezime.Substring(0,1)</div>
+                                }
+                            </td>
+                            <td class="fw-semibold">@r.Ime @r.Prezime</td>
+                            <td><code>@r.JMBG</code></td>
+                            <td>@(string.IsNullOrEmpty(r.BrojUgovora) ? "—" : r.BrojUgovora)</td>
+                            <td><span class="badge bg-success">@r.GodineRadnogIskustva god.</span></td>
+                            <td>@r.Telefon</td>
+                            <td>@r.Email</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-outline-info btn-sm"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit"    asp-route-id="@r.Id" class="btn btn-outline-warning btn-sm"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="Delete"  asp-route-id="@r.Id" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>

@@ -1,46 +1,78 @@
-@model PvcStolarija.DAL.Models.Reklamacija
+@model PvcStolarija.MVC.ViewModels.Reklamacija.ReklamacijaViewModel
 @using PvcStolarija.DAL.Models
-@{ ViewData["Title"] = "Detalji Reklamacije"; var kupac=Model.KupacReklamacije.FirstOrDefault()?.Kupac; }
-<div><div class="row justify-content-center"><div class="col-lg-10">
-    <div class="card shadow-sm"><div class="card-header bg-info text-white"><h4 class="mb-0">Detalji Reklamacije #@Model.Id</h4></div>
-    <div class="card-body">
-        <div class="text-center mb-4">
-            <span class="badge @(Model.Resena?"bg-success":"bg-danger") fs-5 px-4 py-2">@(Model.Resena?"✓ REŠENA":"✗ U TOKU")</span>
+@{ ViewData["Title"] = "Detalji Reklamacije"; }
+
+<div class="page-header">
+    <h2><i class="bi bi-exclamation-triangle me-2"></i>Reklamacija #@Model.Id</h2>
+    @if (Model.Resena)
+    { <span class="badge bg-success fs-6"><i class="bi bi-check-circle me-1"></i>Rešena</span> }
+    else
+    { <span class="badge bg-danger fs-6"><i class="bi bi-clock me-1"></i>U toku</span> }
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-dark text-white"><h6 class="mb-0">Podaci o Reklamaciji</h6></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Datum</dt><dd class="col-sm-8">@Model.Datum.ToString("dd.MM.yyyy HH:mm")</dd>
+                    <dt class="col-sm-4 text-muted">Tip</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.TipReklamacije == TipReklamacije.Pisana)
+                        { <span class="badge bg-info"><i class="bi bi-file-text me-1"></i>Pisana</span> }
+                        else
+                        { <span class="badge bg-warning text-dark"><i class="bi bi-tools me-1"></i>Terenska</span> }
+                    </dd>
+                    <dt class="col-sm-4 text-muted">Prioritet</dt>
+                    <dd class="col-sm-8">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="height:10px;">
+                                <div class="progress-bar @(Model.Resena ? "bg-success" : "bg-danger")" style="width:@Model.Prioritet%"></div>
+                            </div>
+                            <strong class="@(Model.Resena ? "text-success" : "text-danger")">@Model.Prioritet/100</strong>
+                        </div>
+                    </dd>
+                    <dt class="col-sm-4 text-muted">Kupac</dt><dd class="col-sm-8">@(Model.KupacImePrezime ?? "—")</dd>
+                    <dt class="col-sm-4 text-muted">Radnik</dt><dd class="col-sm-8">@(Model.RadnikImePrezime ?? "—")</dd>
+                </dl>
+            </div>
         </div>
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3"><div class="card bg-light"><div class="card-body"><h6 class="text-muted mb-1">Datum</h6><h5>@Model.Datum.ToString("dd.MM.yyyy")</h5></div></div></div>
-            <div class="col-md-4 mb-3"><div class="card bg-light"><div class="card-body"><h6 class="text-muted mb-1">Tip Reklamacije</h6><h5><span class="badge @(Model.TipReklamacije==TipReklamacije.Pisana?"bg-info":"bg-warning text-dark") fs-6">@(Model.TipReklamacije==TipReklamacije.Pisana?"📝 Pisana":"🔧 Terenska")</span></h5></div></div></div>
-            <div class="col-md-4 mb-3"><div class="card bg-light"><div class="card-body"><h6 class="text-muted mb-1">Prioritet</h6><h5 class="@(Model.Resena?"text-success":"text-danger")">@Model.Prioritet / 100</h5></div></div></div>
-        </div>
-        <hr />
-        <h5 class="mb-3">Učesnici</h5>
-        <div class="row mb-4">
-            <div class="col-md-6 mb-3"><div class="card h-100"><div class="card-body text-center">
-                @if(kupac!=null){ <h6 class="card-subtitle mb-2 text-muted">👤 Kupac</h6><h5>@kupac.Ime @kupac.Prezime</h5><p class="small text-muted">@kupac.JMBG</p> }
-                else { <p class="text-muted">N/A</p> }
-            </div></div></div>
-            <div class="col-md-6 mb-3"><div class="card h-100"><div class="card-body text-center">
-                @if(Model.Radnik!=null){ <h6 class="card-subtitle mb-2 text-muted">👷 Odgovorni Radnik</h6><h5>@Model.Radnik.Ime @Model.Radnik.Prezime</h5> }
-                else { <p class="text-muted">N/A</p> }
-            </div></div></div>
-        </div>
-        @if(Model.TipReklamacije==TipReklamacije.Terenska&&Model.ReklamacijaProizvodi.Any()){
-        <hr /><h5 class="mb-3">🪟 Reklamirani Proizvodi <span class="badge bg-secondary">@Model.ReklamacijaProizvodi.Count</span></h5>
-        <div class="row">
-            @foreach(var rp in Model.ReklamacijaProizvodi){
-            var p=rp.Proizvod; var slika=p.Slike?.FirstOrDefault()?.PutanjaDoSlike;
-            <div class="col-md-4 mb-3"><div class="card h-100 shadow-sm">
-                @if(!string.IsNullOrEmpty(slika)){<img src="@slika" class="card-img-top" style="height:180px;object-fit:cover;" />}
-                else{<div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height:180px;"><span style="font-size:3rem;">🪟</span></div>}
-                <div class="card-body"><h6>@p.Naziv @p.Model</h6><p class="small text-muted">@p.Sifra</p></div>
-            </div></div>
-            }
-        </div>
+
+        @if (Model.TipReklamacije == TipReklamacije.Terenska && Model.Proizvodi.Any())
+        {
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-warning"><h6 class="mb-0"><i class="bi bi-grid me-2"></i>Reklamirani Proizvodi (@Model.Proizvodi.Count)</h6></div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @foreach (var p in Model.Proizvodi)
+                        {
+                            <div class="col-md-4">
+                                <div class="card h-100 shadow-sm">
+                                    @if (!string.IsNullOrEmpty(p.PrvaSlika))
+                                    {
+                                        <img src="@p.PrvaSlika" class="card-img-top" style="height:140px;object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height:140px;font-size:2rem;">🪟</div>
+                                    }
+                                    <div class="card-body p-2">
+                                        <p class="fw-semibold mb-0 small">@p.Naziv</p>
+                                        <p class="text-muted small mb-0">@p.Sifra</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
         }
-        <hr /><div class="d-flex gap-2">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Izmeni</a>
-            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Obriši</a>
-            <a asp-action="Index" class="btn btn-secondary">Nazad</a>
+
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><i class="bi bi-pencil me-1"></i>Izmeni</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Obriši</a>
+            <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i>Nazad</a>
         </div>
-    </div></div>
-</div></div></div>
+    </div>
+</div>

@@ -1,50 +1,109 @@
-@model PvcStolarija.DAL.Models.Reklamacija
+@model PvcStolarija.MVC.ViewModels.Reklamacija.ReklamacijaViewModel
 @using PvcStolarija.DAL.Models
-@{ ViewData["Title"] = "Izmeni Reklamaciju"; var selKupacId=(int)(ViewBag.SelectedKupacId??0); var selProizvodi=ViewBag.SelectedProizvodi as List<int>??new List<int>(); }
-<div><div class="row justify-content-center"><div class="col-lg-8">
-    <div class="card shadow-sm"><div class="card-header bg-warning"><h4 class="mb-0">Izmeni Reklamaciju #@Model.Id</h4></div>
-    <div class="card-body">
-        <form asp-action="Edit" method="post">
-            <input type="hidden" asp-for="Id" />
-            <div class="row">
-                <div class="col-md-6 mb-3"><label asp-for="TipReklamacije" class="form-label">Tip Reklamacije</label>
-                    <select asp-for="TipReklamacije" class="form-select" id="tipReklamacije">
-                        <option value="0" selected="@(Model.TipReklamacije==TipReklamacije.Pisana)">📝 Pisana</option>
-                        <option value="1" selected="@(Model.TipReklamacije==TipReklamacije.Terenska)">🔧 Terenska</option>
-                    </select></div>
-                <div class="col-md-6 mb-3"><label asp-for="Datum" class="form-label">Datum</label><input asp-for="Datum" type="datetime-local" class="form-control" /></div>
+@{ ViewData["Title"] = "Izmeni Reklamaciju"; }
+
+<div class="page-header">
+    <h2><i class="bi bi-pencil-square me-2"></i>Izmeni Reklamaciju #@Model.Id</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="TipReklamacije" class="form-label">Tip Reklamacije <span class="text-danger">*</span></label>
+                            <select asp-for="TipReklamacije" class="form-select" id="tipSelect"
+                                    asp-items="Html.GetEnumSelectList<TipReklamacije>()"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Datum" class="form-label">Datum <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                                <input asp-for="Datum" class="form-control" type="datetime-local" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Prioritet" class="form-label">Prioritet (0–100) <span class="text-danger">*</span></label>
+                            <input asp-for="Prioritet" class="form-control" type="number" min="0" max="100" id="prioritetInput" />
+                            <div id="statusBadge" class="mt-1"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="RadnikId" class="form-label">Odgovorni Radnik <span class="text-danger">*</span></label>
+                            <select asp-for="RadnikId" class="form-select">
+                                <option value="">-- Izaberi --</option>
+                                @foreach (var r in Model.RadniciLista)
+                                {
+                                    <option value="@r.Id" selected="@(r.Id == Model.RadnikId)">@r.ImePrezime</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="KupacId" class="form-label">Kupac <span class="text-danger">*</span></label>
+                            <select asp-for="KupacId" class="form-select">
+                                <option value="">-- Izaberi --</option>
+                                @foreach (var k in Model.KupciLista)
+                                {
+                                    <option value="@k.Id" selected="@(k.Id == Model.KupacId)">@k.ImePrezime (@k.JMBG)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="proizvodiSection">
+                        <hr />
+                        <h6 class="fw-semibold mb-2 text-muted"><i class="bi bi-grid me-1"></i>Reklamirani Proizvodi</h6>
+                        <div class="row g-2">
+                            @foreach (var p in Model.ProizvodiLista)
+                            {
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body p-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="SelectedProizvodiIds"
+                                                       value="@p.Id" id="p_@p.Id"
+                                                       @(Model.SelectedProizvodiIds.Contains(p.Id) ? "checked" : "") />
+                                                <label class="form-check-label" for="p_@p.Id">
+                                                    <strong>@p.Naziv</strong><br />
+                                                    <small class="text-muted">@p.Sifra</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Sačuvaj Izmene</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-x me-1"></i>Otkaži</a>
+                    </div>
+                </form>
             </div>
-            <div class="row">
-                <div class="col-md-6 mb-3"><label asp-for="Prioritet" class="form-label">Prioritet (0–100)</label><input asp-for="Prioritet" type="number" min="0" max="100" class="form-control" id="prioritetInput" /></div>
-                <div class="col-md-6 mb-3"><label class="form-label">Kupac</label>
-                    <select name="kupacId" class="form-select" required>
-                        <option value="">-- Izaberi kupca --</option>
-                        @foreach(var k in ViewBag.Kupci){<option value="@k.Id" selected="@(k.Id==selKupacId)">@k.Ime @k.Prezime</option>}
-                    </select></div>
-            </div>
-            <div class="mb-3"><label asp-for="RadnikId" class="form-label">Odgovorni Radnik</label>
-                <select asp-for="RadnikId" class="form-select">
-                    <option value="">-- Izaberi radnika --</option>
-                    @foreach(var r in ViewBag.RadniciLista){<option value="@r.Id" selected="@(r.Id==Model.RadnikId)">@r.Ime @r.Prezime</option>}
-                </select></div>
-            <div id="proizvodiSection" class="mb-3">
-                <label class="form-label">Reklamirani Proizvodi</label>
-                <div class="row">
-                    @foreach(var p in ViewBag.ProizvodiLista){
-                    <div class="col-md-6 mb-2"><div class="card"><div class="card-body p-2"><div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="selectedProizvodi" value="@p.Id" id="p_@p.Id" @(selProizvodi.Contains(p.Id)?"checked":"") />
-                        <label class="form-check-label" for="p_@p.Id"><strong>@p.Naziv @p.Model</strong><br/><small>@p.Sifra</small></label>
-                    </div></div></div></div>
-                    }
-                </div>
-            </div>
-            <div class="d-flex gap-2"><button type="submit" class="btn btn-success">Sačuvaj Izmene</button><a asp-action="Index" class="btn btn-secondary">Otkaži</a></div>
-        </form>
-    </div></div>
-</div></div></div>
-@section Scripts { <partial name="_ValidationScriptsPartial" />
-<script>
-function toggleProizvodi(){const t=document.getElementById('tipReklamacije').value;document.getElementById('proizvodiSection').style.display=t==='1'?'block':'none';}
-document.getElementById('tipReklamacije').addEventListener('change',toggleProizvodi);
-window.addEventListener('DOMContentLoaded',toggleProizvodi);
-</script> }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        function toggle() {
+            const t = document.getElementById('tipSelect').value;
+            document.getElementById('proizvodiSection').style.display = t === '1' ? 'block' : 'none';
+        }
+        function updateStatus() {
+            const p = parseInt(document.getElementById('prioritetInput').value) || 0;
+            document.getElementById('statusBadge').innerHTML =
+                p >= 51 ? '<span class="badge bg-success">Rešena</span>' : '<span class="badge bg-danger">U toku</span>';
+        }
+        document.getElementById('tipSelect').addEventListener('change', toggle);
+        document.getElementById('prioritetInput').addEventListener('input', updateStatus);
+        toggle(); updateStatus();
+    </script>
+}

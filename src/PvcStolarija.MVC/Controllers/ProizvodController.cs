@@ -1,98 +1,118 @@
-using PvcStolarija.BLL.Interfaces;
-using PvcStolarija.DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PvcStolarija.BLL.Interfaces;
+using PvcStolarija.DAL.Models;
+using PvcStolarija.MVC.ViewModels.Proizvod;
 
 namespace PvcStolarija.MVC.Controllers
 {
     public class ProizvodController : Controller
     {
         private readonly IProizvodService _proizvodService;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IWebHostEnvironment _env;
 
-        public ProizvodController(IProizvodService proizvodService, IWebHostEnvironment webHostEnvironment)
+        public ProizvodController(IProizvodService proizvodService, IWebHostEnvironment env)
         {
             _proizvodService = proizvodService;
-            _webHostEnvironment = webHostEnvironment;
+            _env = env;
         }
+
+        private static ProizvodViewModel ToViewModel(Proizvod p) => new()
+        {
+            Id = p.Id, Naziv = p.Naziv, Model = p.Model, Sifra = p.Sifra,
+            GodinaProizvodnje = p.GodinaProizvodnje,
+            TipMaterijala = p.TipMaterijala, Dostupnost = p.Dostupnost,
+            Slike = p.Slike?.Select(s => new ProizvodSlikaViewModel
+            {
+                Id = s.Id, PutanjaDoSlike = s.PutanjaDoSlike, Opis = s.Opis
+            }).ToList() ?? new()
+        };
+
+        private static Proizvod ToEntity(ProizvodViewModel vm) => new()
+        {
+            Id = vm.Id, Naziv = vm.Naziv, Model = vm.Model, Sifra = vm.Sifra,
+            GodinaProizvodnje = vm.GodinaProizvodnje,
+            TipMaterijala = vm.TipMaterijala, Dostupnost = vm.Dostupnost
+        };
 
         public async Task<IActionResult> Index()
         {
             var proizvodi = await _proizvodService.GetAllAsync();
-            return View(proizvodi);
+            return View(proizvodi.Select(ToViewModel).ToList());
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var proizvod = await _proizvodService.GetByIdAsync(id);
-            if (proizvod == null) { TempData["ErrorMessage"] = "Proizvod nije pronađen."; return RedirectToAction(nameof(Index)); }
-            return View(proizvod);
+            var p = await _proizvodService.GetByIdAsync(id);
+            if (p == null) { TempData["ErrorMessage"] = "Proizvod nije pronađen."; return RedirectToAction(nameof(Index)); }
+            return View(ToViewModel(p));
         }
 
         [Authorize(Roles = "Administrator")]
-        public IActionResult Create() => View();
+        public IActionResult Create() => View(new ProizvodViewModel());
 
         [HttpPost]
         [Authorize(Roles = "Administrator")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Proizvod proizvod, List<IFormFile>? slike, List<string>? opisiSlika)
+        public async Task<IActionResult> Create(ProizvodViewModel vm)
         {
-            ModelState.Remove("Slike");
-            ModelState.Remove("Narudzbine");
-            ModelState.Remove("ReklamacijaProizvodi");
-            if (ModelState.IsValid)
+            ModelState.Remove(nameof(vm.NoveSlike));
+            ModelState.Remove(nameof(vm.Slike));
+            if (!ModelState.IsValid) return View(vm);
+            try
             {
-                try
-                {
-                    await _proizvodService.AddAsync(proizvod);
-                    if (slike?.Any() == true)
-                        await SaveProizvodSlike(proizvod.Id, slike, opisiSlika);
-                    TempData["SuccessMessage"] = "Proizvod je uspešno dodat!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex) { TempData["ErrorMessage"] = $"Greška: {ex.Message}"; }
+                var entity = ToEntity(vm);
+                await _proizvodService.AddAsync(entity);
+
+                if (vm.NoveSlike?.Any() == true)
+                    await SaveSlike(entity.Id, vm.NoveSlike, vm.OpisiNovihSlika);
+
+                TempData["SuccessMessage"] = "Proizvod je uspešno dodat!";
+                return RedirectToAction(nameof(Index));
             }
-            return View(proizvod);
+            catch (Exception ex) { TempData["ErrorMessage"] = $"Greška: {ex.Message}"; return View(vm); }
         }
 
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(int id)
         {
-            var proizvod = await _proizvodService.GetByIdAsync(id);
-            if (proizvod == null) { TempData["ErrorMessage"] = "Proizvod nije pronađen."; return RedirectToAction(nameof(Index)); }
-            return View(proizvod);
+            var p = await _proizvodService.GetByIdAsync(id);
+            if (p == null) { TempData["ErrorMessage"] = "Proizvod nije pronađen."; return RedirectToAction(nameof(Index)); }
+            return View(ToViewModel(p));
         }
 
         [HttpPost]
         [Authorize(Roles = "Administrator")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Proizvod proizvod, List<IFormFile>? noveSlike, List<string>? opisiNovihSlika)
+        public async Task<IActionResult> Edit(int id, ProizvodViewModel vm)
         {
-            if (id != proizvod.Id) return NotFound();
-            ModelState.Remove("Slike"); ModelState.Remove("Narudzbine"); ModelState.Remove("ReklamacijaProizvodi");
-            if (ModelState.IsValid)
+            if (id != vm.Id) return NotFound();
+            ModelState.Remove(nameof(vm.NoveSlike));
+            ModelState.Remove(nameof(vm.Slike));
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    await _proizvodService.UpdateAsync(proizvod);
-                    if (noveSlike?.Any() == true)
-                        await SaveProizvodSlike(proizvod.Id, noveSlike, opisiNovihSlika);
-                    TempData["SuccessMessage"] = "Proizvod je uspešno ažuriran!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex) { TempData["ErrorMessage"] = $"Greška: {ex.Message}"; }
+                var existing = await _proizvodService.GetByIdAsync(id);
+                if (existing != null) vm.Slike = ToViewModel(existing).Slike;
+                return View(vm);
             }
-            var pSaSlikama = await _proizvodService.GetByIdAsync(id);
-            proizvod.Slike = pSaSlikama?.Slike;
-            return View(proizvod);
+            try
+            {
+                await _proizvodService.UpdateAsync(ToEntity(vm));
+                if (vm.NoveSlike?.Any() == true)
+                    await SaveSlike(vm.Id, vm.NoveSlike, vm.OpisiNovihSlika);
+
+                TempData["SuccessMessage"] = "Proizvod je uspešno ažuriran!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex) { TempData["ErrorMessage"] = $"Greška: {ex.Message}"; return View(vm); }
         }
 
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Delete(int id)
         {
-            var proizvod = await _proizvodService.GetByIdAsync(id);
-            if (proizvod == null) { TempData["ErrorMessage"] = "Proizvod nije pronađen."; return RedirectToAction(nameof(Index)); }
-            return View(proizvod);
+            var p = await _proizvodService.GetByIdAsync(id);
+            if (p == null) { TempData["ErrorMessage"] = "Proizvod nije pronađen."; return RedirectToAction(nameof(Index)); }
+            return View(ToViewModel(p));
         }
 
         [HttpPost, ActionName("Delete")]
@@ -102,10 +122,9 @@ namespace PvcStolarija.MVC.Controllers
         {
             try
             {
-                var proizvod = await _proizvodService.GetByIdAsync(id);
-                if (proizvod?.Slike?.Any() == true)
-                    foreach (var slika in proizvod.Slike)
-                        DeleteImageFile(slika.PutanjaDoSlike);
+                var p = await _proizvodService.GetByIdAsync(id);
+                if (p?.Slike?.Any() == true)
+                    foreach (var s in p.Slike) DeleteFile(s.PutanjaDoSlike);
                 await _proizvodService.DeleteAsync(id);
                 TempData["SuccessMessage"] = "Proizvod je uspešno obrisan!";
             }
@@ -121,44 +140,41 @@ namespace PvcStolarija.MVC.Controllers
             {
                 var slika = await _proizvodService.GetSlikaByIdAsync(id);
                 if (slika == null) return Json(new { success = false, message = "Slika nije pronađena." });
-                DeleteImageFile(slika.PutanjaDoSlike);
+                DeleteFile(slika.PutanjaDoSlike);
                 await _proizvodService.DeleteSlikaAsync(id);
                 return Json(new { success = true });
             }
             catch (Exception ex) { return Json(new { success = false, message = ex.Message }); }
         }
 
-        private async Task SaveProizvodSlike(int proizvodId, List<IFormFile> slike, List<string>? opisi)
+        private async Task SaveSlike(int proizvodId, List<IFormFile> slike, List<string>? opisi)
         {
-            var webRoot = _webHostEnvironment.WebRootPath ?? Path.Combine(_webHostEnvironment.ContentRootPath, "wwwroot");
-            string uploadsFolder = Path.Combine(webRoot, "uploads", "proizvodi");
-            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+            var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+            var folder = Path.Combine(webRoot, "uploads", "proizvodi");
+            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+
             for (int i = 0; i < slike.Count; i++)
             {
                 var file = slike[i];
-                if (file.Length > 0)
+                if (file.Length == 0) continue;
+                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                using var stream = new FileStream(Path.Combine(folder, fileName), FileMode.Create);
+                await file.CopyToAsync(stream);
+                await _proizvodService.AddSlikaAsync(new ProizvodSlika
                 {
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                    using (var fs = new FileStream(filePath, FileMode.Create)) await file.CopyToAsync(fs);
-                    await _proizvodService.AddSlikaAsync(new ProizvodSlika
-                    {
-                        ProizvodId = proizvodId,
-                        PutanjaDoSlike = "/uploads/proizvodi/" + uniqueFileName,
-                        Opis = opisi != null && i < opisi.Count ? opisi[i] : null
-                    });
-                }
+                    ProizvodId = proizvodId,
+                    PutanjaDoSlike = "/uploads/proizvodi/" + fileName,
+                    Opis = opisi != null && i < opisi.Count ? opisi[i] : null
+                });
             }
         }
 
-        private void DeleteImageFile(string imagePath)
+        private void DeleteFile(string path)
         {
-            if (!string.IsNullOrEmpty(imagePath))
-            {
-                var webRoot2 = _webHostEnvironment.WebRootPath ?? Path.Combine(_webHostEnvironment.ContentRootPath, "wwwroot");
-                string fullPath = Path.Combine(webRoot2, imagePath.TrimStart('/'));
-                if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
-            }
+            if (string.IsNullOrEmpty(path)) return;
+            var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+            var full = Path.Combine(webRoot, path.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+            if (System.IO.File.Exists(full)) System.IO.File.Delete(full);
         }
     }
 }

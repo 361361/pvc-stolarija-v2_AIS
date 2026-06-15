@@ -1,53 +1,73 @@
-@model PvcStolarija.DAL.Models.Proizvod
+@model PvcStolarija.MVC.ViewModels.Proizvod.ProizvodViewModel
 @using PvcStolarija.DAL.Models
 @{ ViewData["Title"] = "Detalji Proizvoda"; }
-<div>
-    <div class="page-header mb-4"><h2>Detalji Proizvoda</h1><hr />
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-4"><div class="card-header bg-primary text-white"><h5 class="mb-0">@Model.Naziv @Model.Model</h5></div>
-            <div class="card-body"><dl class="row">
-                <dt class="col-sm-4">Naziv</dt><dd class="col-sm-8">@Model.Naziv</dd>
-                <dt class="col-sm-4">Model</dt><dd class="col-sm-8">@Model.Model</dd>
-                <dt class="col-sm-4">Šifra</dt><dd class="col-sm-8"><span class="badge bg-primary fs-5">@Model.Sifra</span></dd>
-                <dt class="col-sm-4">Godina</dt><dd class="col-sm-8">@(Model.GodinaProizvodnje.HasValue ? Model.GodinaProizvodnje.ToString() : "Nije uneto")</dd>
-                <dt class="col-sm-4">Tip Materijala</dt><dd class="col-sm-8">
-                    @switch(Model.TipMaterijala){
-                        case TipMaterijala.PVC: <span class="badge bg-primary">PVC</span> break;
-                        case TipMaterijala.Aluminijum: <span class="badge bg-dark">Aluminijum</span> break;
-                        case TipMaterijala.Drvo: <span class="badge bg-warning text-dark">Drvo</span> break;
-                    }
-                </dd>
-                <dt class="col-sm-4">Dostupnost</dt><dd class="col-sm-8">
-                    @if (Model.Dostupnost == Dostupnost.Dostupan) { <span class="badge bg-success fs-6">Dostupan</span> }
-                    else { <span class="badge bg-danger fs-6">Nedostupan</span> }
-                </dd>
-            </dl></div></div>
-        </div>
-        <div class="col-md-4">
-            <div class="card"><div class="card-header bg-secondary text-white"><h6 class="mb-0">Slike Proizvoda (@(Model.Slike?.Count ?? 0))</h6></div>
+
+<div class="page-header">
+    <h2><i class="bi bi-grid me-2"></i>@Model.Naziv @Model.Model</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-dark text-white"><h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Specifikacija</h6></div>
             <div class="card-body">
-                @if (Model.Slike?.Any() == true) {
-                    <div id="proizvodCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-                            @{ int idx=0; }
-                            @foreach (var s in Model.Slike) {
-                                <div class="carousel-item @(idx==0?"active":"")"><img src="@s.PutanjaDoSlike" class="d-block w-100" style="height:250px;object-fit:cover;" /></div>
-                                idx++;
-                            }
-                        </div>
-                        @if(Model.Slike.Count > 1){
-                        <button class="carousel-control-prev" type="button" data-bs-target="#proizvodCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#proizvodCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Naziv</dt><dd class="col-sm-8">@Model.Naziv</dd>
+                    <dt class="col-sm-4 text-muted">Model</dt><dd class="col-sm-8">@Model.Model</dd>
+                    <dt class="col-sm-4 text-muted">Šifra</dt><dd class="col-sm-8"><span class="badge bg-primary fs-6">@Model.Sifra</span></dd>
+                    <dt class="col-sm-4 text-muted">Godina</dt><dd class="col-sm-8">@(Model.GodinaProizvodnje.HasValue ? Model.GodinaProizvodnje.ToString() : "—")</dd>
+                    <dt class="col-sm-4 text-muted">Tip Materijala</dt>
+                    <dd class="col-sm-8">
+                        @switch (Model.TipMaterijala)
+                        {
+                            case TipMaterijala.PVC: <span class="badge bg-primary">PVC</span> break;
+                            case TipMaterijala.Aluminijum: <span class="badge bg-dark">Aluminijum</span> break;
+                            case TipMaterijala.Drvo: <span class="badge bg-warning text-dark">Drvo</span> break;
                         }
-                    </div>
-                } else { <p class="text-muted text-center">Nema slika.</p> }
-            </div></div>
+                    </dd>
+                    <dt class="col-sm-4 text-muted">Dostupnost</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Dostupnost == Dostupnost.Dostupan)
+                        { <span class="badge bg-success fs-6">Dostupan</span> }
+                        else
+                        { <span class="badge bg-danger fs-6">Nedostupan</span> }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><i class="bi bi-pencil me-1"></i>Izmeni</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Obriši</a>
+            <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left me-1"></i>Nazad</a>
         </div>
     </div>
-    <div class="mt-4">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Izmeni</a>
-        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Obriši</a>
-        <a asp-action="Index" class="btn btn-secondary">Nazad</a>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white"><h6 class="mb-0"><i class="bi bi-images me-2"></i>Slike (@Model.Slike.Count)</h6></div>
+            <div class="card-body p-2">
+                @if (Model.Slike.Any())
+                {
+                    <div id="carousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @{ int i = 0; }
+                            @foreach (var s in Model.Slike)
+                            {
+                                <div class="carousel-item @(i++ == 0 ? "active" : "")">
+                                    <img src="@s.PutanjaDoSlike" class="d-block w-100 rounded" style="height:220px;object-fit:cover;" />
+                                    @if (!string.IsNullOrEmpty(s.Opis))
+                                    { <p class="text-center small text-muted mt-1">@s.Opis</p> }
+                                </div>
+                            }
+                        </div>
+                        @if (Model.Slike.Count > 1)
+                        {
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                        }
+                    </div>
+                }
+                else { <p class="text-muted text-center py-3"><i class="bi bi-image fs-2 d-block mb-2"></i>Nema slika.</p> }
+            </div>
+        </div>
     </div>
 </div>

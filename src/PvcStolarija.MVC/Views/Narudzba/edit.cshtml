@@ -1,60 +1,117 @@
-@model PvcStolarija.DAL.Models.Narudzba
+@model PvcStolarija.MVC.ViewModels.Narudzba.NarudzbaViewModel
 @using PvcStolarija.DAL.Models
 @{ ViewData["Title"] = "Izmeni Narudžbu"; }
-<div>
-    <div class="page-header mb-4"><h2>Izmeni Narudžbu #@Model.BrojNarudzbe</h1><hr />
-    <div class="row"><div class="col-md-8">
-        <form asp-action="Edit" method="post">
-            <input type="hidden" asp-for="Id" />
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            <div class="row">
-                <div class="col-md-6 mb-3"><label asp-for="BrojNarudzbe" class="form-label">Broj Narudžbe *</label><input asp-for="BrojNarudzbe" class="form-control" type="number" min="1" /></div>
-                <div class="col-md-6 mb-3"><label asp-for="TipNarudzbe" class="form-label">Tip Narudžbe *</label>
-                    <select asp-for="TipNarudzbe" class="form-control" asp-items="Html.GetEnumSelectList<TipNarudzbe>()"></select></div>
-            </div>
-            <div class="mb-3"><label asp-for="Datum" class="form-label">Datum</label><input asp-for="Datum" class="form-control" type="date" /></div>
-            <div class="row">
-                <div class="col-md-6 mb-3"><label asp-for="RadnikId" class="form-label">Odgovorni Radnik</label>
-                    <select asp-for="RadnikId" class="form-control">
-                        <option value="">-- Izaberi Radnika --</option>
-                        @if(ViewBag.RadniciLista!=null){@foreach(var r in (IEnumerable<Radnik>)ViewBag.RadniciLista){<option value="@r.Id" selected="@(r.Id==Model.RadnikId)">@r.Ime @r.Prezime</option>}}
-                    </select></div>
-                <div class="col-md-6 mb-3"><label asp-for="ProizvodId" class="form-label">Naručeni Proizvod</label>
-                    <select asp-for="ProizvodId" class="form-control">
-                        <option value="">-- Izaberi Proizvod --</option>
-                        @if(ViewBag.ProizvodiLista!=null){@foreach(var p in (IEnumerable<Proizvod>)ViewBag.ProizvodiLista){<option value="@p.Id" selected="@(p.Id==Model.ProizvodId)">@p.Naziv @p.Model</option>}}
-                    </select></div>
-            </div>
-            <hr /><h5 class="mb-3">Kupci na Narudžbi</h5>
-            <div class="card"><div class="card-body" style="max-height:500px;overflow-y:auto;">
-                @{
-                    var selKupci = ViewBag.SelectedKupci as List<int> ?? new List<int>();
-                    var knMap = Model.KupacNarudzbine?.ToDictionary(k => k.KupacId) ?? new Dictionary<int, KupacNarudzba>();
-                }
-                @if(ViewBag.Kupci!=null&&((IEnumerable<Kupac>)ViewBag.Kupci).Any()){
-                <table class="table table-sm"><thead><tr><th>Izaberi</th><th>Kupac</th><th>Detalji</th></tr></thead><tbody>
-                    @foreach(var k in (IEnumerable<Kupac>)ViewBag.Kupci){
-                    var isSel=selKupci.Contains(k.Id);
-                    var kn=knMap.ContainsKey(k.Id)?knMap[k.Id]:null;
-                    <tr class="kupac-row" data-kupac-id="@k.Id">
-                        <td class="text-center align-middle"><input class="form-check-input" type="checkbox" name="selectedKupci" value="@k.Id" @(isSel?"checked":"") onchange="toggleKupacRow(this)" /></td>
-                        <td class="align-middle">@k.Ime @k.Prezime <small class="text-muted">(@k.JMBG)</small></td>
-                        <td class="align-middle kupac-details" style="@(isSel?"":"display:none;")">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><input class="form-check-input mt-0" type="checkbox" name="potvrdjen_@k.Id" @(kn?.Potvrdjen==true?"checked":"") title="Potvrđeno" /></span>
-                                <input type="text" class="form-control" name="napomene_@k.Id" value="@(kn?.Napomena??"")" placeholder="Napomena..." />
-                            </div>
-                            <small class="text-muted">Čekiraj ako je potvrđeno</small>
-                        </td>
-                    </tr>
-                    }
-                </tbody></table>
-                } else { <p class="text-muted mb-0">Nema kupaca.</p> }
-            </div></div>
-            <div class="mt-4"><button type="submit" class="btn btn-success">Sačuvaj Izmene</button> <a asp-action="Index" class="btn btn-secondary">Nazad</a></div>
-        </form>
-    </div></div>
+
+<div class="page-header">
+    <h2><i class="bi bi-pencil-square me-2"></i>Izmeni Narudžbu #@Model.BrojNarudzbe</h2>
 </div>
-@section Scripts { @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-<script>function toggleKupacRow(cb){const r=cb.closest('.kupac-row');const d=r.querySelector('.kupac-details');d.style.display=cb.checked?'':'none';if(!cb.checked){const c=d.querySelector('input[type="checkbox"]');const t=d.querySelector('input[type="text"]');if(c)c.checked=false;if(t)t.value='';}}
-</script> }
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="BrojNarudzbe" class="form-label">Broj Narudžbe <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                <input asp-for="BrojNarudzbe" class="form-control" type="number" min="1" />
+                            </div>
+                            <span asp-validation-for="BrojNarudzbe" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="TipNarudzbe" class="form-label">Tip <span class="text-danger">*</span></label>
+                            <select asp-for="TipNarudzbe" class="form-select" asp-items="Html.GetEnumSelectList<TipNarudzbe>()"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Datum" class="form-label">Datum</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                                <input asp-for="Datum" class="form-control" type="date" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="RadnikId" class="form-label">Odgovorni Radnik</label>
+                            <select asp-for="RadnikId" class="form-select">
+                                <option value="">-- Izaberi Radnika --</option>
+                                @foreach (var r in Model.RadniciLista)
+                                {
+                                    <option value="@r.Id" selected="@(r.Id == Model.RadnikId)">@r.ImePrezime</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ProizvodId" class="form-label">Naručeni Proizvod</label>
+                            <select asp-for="ProizvodId" class="form-select">
+                                <option value="">-- Izaberi Proizvod --</option>
+                                @foreach (var p in Model.ProizvodiLista)
+                                {
+                                    <option value="@p.Id" selected="@(p.Id == Model.ProizvodId)">@p.Naziv</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <h6 class="fw-semibold mb-3 text-muted"><i class="bi bi-people me-1"></i>Kupci na Narudžbi</h6>
+                    <div class="card bg-light">
+                        <div class="card-body" style="max-height:400px;overflow-y:auto;">
+                            @if (Model.SviKupci.Any())
+                            {
+                                <table class="table table-sm table-hover mb-0 bg-white rounded">
+                                    <thead><tr><th>Izaberi</th><th>Kupac</th><th>Potvrđeno</th><th>Napomena</th></tr></thead>
+                                    <tbody>
+                                        @foreach (var k in Model.SviKupci)
+                                        {
+                                            var isSel = Model.SelectedKupciIds.Contains(k.Id);
+                                            var kn = Model.KupacNarudzbine.FirstOrDefault(x => x.KupacId == k.Id);
+                                            <tr class="kupac-row" data-id="@k.Id">
+                                                <td class="text-center align-middle">
+                                                    <input class="form-check-input" type="checkbox" name="SelectedKupciIds" value="@k.Id"
+                                                           @(isSel ? "checked" : "") onchange="toggleRow(this)" />
+                                                </td>
+                                                <td class="align-middle">
+                                                    <strong>@k.ImePrezime</strong><br/>
+                                                    <small class="text-muted">@k.JMBG</small>
+                                                </td>
+                                                <td class="align-middle details-col" style="@(isSel ? "" : "display:none")">
+                                                    <input class="form-check-input" type="checkbox" name="potvrdjen_@k.Id"
+                                                           @(kn?.Potvrdjen == true ? "checked" : "") />
+                                                </td>
+                                                <td class="align-middle details-col" style="@(isSel ? "" : "display:none")">
+                                                    <input type="text" class="form-control form-control-sm" name="napomene_@k.Id"
+                                                           value="@(kn?.Napomena ?? "")" placeholder="Napomena..." />
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else { <p class="text-muted mb-0">Nema kupaca.</p> }
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Sačuvaj Izmene</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-x me-1"></i>Otkaži</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        function toggleRow(cb) {
+            const row = cb.closest('.kupac-row');
+            row.querySelectorAll('.details-col').forEach(c => c.style.display = cb.checked ? '' : 'none');
+        }
+    </script>
+}

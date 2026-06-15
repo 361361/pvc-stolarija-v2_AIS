@@ -1,24 +1,93 @@
-@model PvcStolarija.DAL.Models.Kupac
+@model PvcStolarija.MVC.ViewModels.Kupac.KupacViewModel
 @{ ViewData["Title"] = "Dodaj Kupca"; }
-<div>
-    <div class="page-header mb-4"><h2>Dodaj Novog Kupca</h1><hr />
-    <div class="row"><div class="col-md-8">
-        <form asp-action="Create" method="post" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            <div class="row">
-                <div class="col-md-6 mb-3"><label asp-for="Ime" class="form-label">Ime *</label><input asp-for="Ime" class="form-control" /></div>
-                <div class="col-md-6 mb-3"><label asp-for="Prezime" class="form-label">Prezime *</label><input asp-for="Prezime" class="form-control" /></div>
-            </div>
-            <div class="mb-3"><label asp-for="JMBG" class="form-label">JMBG *</label><input asp-for="JMBG" class="form-control" maxlength="13" /></div>
-            <div class="row">
-                <div class="col-md-6 mb-3"><label asp-for="Telefon" class="form-label">Telefon</label><input asp-for="Telefon" class="form-control" /></div>
-                <div class="col-md-6 mb-3"><label asp-for="Email" class="form-label">Email</label><input asp-for="Email" class="form-control" type="email" /></div>
-            </div>
-            <div class="mb-3"><label asp-for="DatumRegistracije" class="form-label">Datum Registracije *</label><input asp-for="DatumRegistracije" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" /></div>
-            <div class="mb-3"><label for="profilnaSlika" class="form-label">Profilna Slika</label><input type="file" name="profilnaSlika" class="form-control" accept="image/*" onchange="previewImage(event)" /></div>
-            <div class="mb-3"><img id="imagePreview" src="#" style="max-width:200px;max-height:200px;display:none;" class="img-thumbnail" /></div>
-            <div class="mt-4"><button type="submit" class="btn btn-success">Sačuvaj</button> <a asp-action="Index" class="btn btn-secondary">Nazad</a></div>
-        </form>
-    </div></div>
+
+<div class="page-header">
+    <h2><i class="bi bi-person-plus me-2"></i>Dodaj Novog Kupca</h2>
 </div>
-@section Scripts { @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} <script>function previewImage(e){var r=new FileReader();r.onload=function(){var o=document.getElementById('imagePreview');o.src=r.result;o.style.display='block'};r.readAsDataURL(e.target.files[0])}</script> }
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Ime" class="form-label">Ime <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="Ime" class="form-control" placeholder="Unesite ime" />
+                            </div>
+                            <span asp-validation-for="Ime" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Prezime" class="form-label">Prezime <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="Prezime" class="form-control" placeholder="Unesite prezime" />
+                            </div>
+                            <span asp-validation-for="Prezime" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="JMBG" class="form-label">JMBG <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                                <input asp-for="JMBG" class="form-control" maxlength="13" placeholder="13 cifara" />
+                            </div>
+                            <span asp-validation-for="JMBG" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DatumRegistracije" class="form-label">Datum Registracije <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                                <input asp-for="DatumRegistracije" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <span asp-validation-for="DatumRegistracije" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Telefon" class="form-label">Telefon</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input asp-for="Telefon" class="form-control" placeholder="+381..." />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Email" class="form-control" type="email" placeholder="email@primer.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <h6 class="fw-semibold mb-2 text-muted"><i class="bi bi-image me-1"></i>Profilna Slika</h6>
+                    <div class="mb-3">
+                        <input asp-for="ProfilnaSlikaFajl" type="file" class="form-control" accept="image/*" onchange="previewImage(event)" />
+                        <small class="text-muted">Opciono — JPG, PNG, GIF, max 5MB</small>
+                    </div>
+                    <img id="imagePreview" src="#" style="max-width:150px;max-height:150px;display:none;border-radius:8px;" class="border mb-3" />
+
+                    <hr />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Sačuvaj</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-x me-1"></i>Otkaži</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        function previewImage(e) {
+            const r = new FileReader();
+            r.onload = () => { const o = document.getElementById('imagePreview'); o.src = r.result; o.style.display = 'block'; };
+            r.readAsDataURL(e.target.files[0]);
+        }
+    </script>
+}

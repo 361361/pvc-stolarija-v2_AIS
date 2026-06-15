@@ -1,18 +1,30 @@
-@model PvcStolarija.DAL.Models.Radnik
+@model PvcStolarija.MVC.ViewModels.Radnik.RadnikViewModel
 @{ ViewData["Title"] = "Obriši Radnika"; }
-<div>
-    <div class="page-header mb-4" style="background:linear-gradient(135deg,#dc3545,#b02a37)"><h2>Obriši Radnika</h1>
-    <div class="alert alert-warning"><strong>Upozorenje!</strong> Da li ste sigurni da želite obrisati ovog radnika?</div>
-    <div class="card"><div class="card-header bg-danger text-white"><h5 class="mb-0">Podaci radnika</h5></div>
-    <div class="card-body"><dl class="row">
-        <dt class="col-sm-3">Ime</dt><dd class="col-sm-9">@Model.Ime</dd>
-        <dt class="col-sm-3">Prezime</dt><dd class="col-sm-9">@Model.Prezime</dd>
-        <dt class="col-sm-3">JMBG</dt><dd class="col-sm-9">@Model.JMBG</dd>
-        <dt class="col-sm-3">Ugovor</dt><dd class="col-sm-9">@(string.IsNullOrEmpty(Model.BrojUgovora)?"-":Model.BrojUgovora)</dd>
-    </dl></div></div>
-    <form asp-action="Delete" method="post" class="mt-3">
-        <input type="hidden" asp-for="Id" />
-        <button type="submit" class="btn btn-danger">Potvrdi Brisanje</button>
-        <a asp-action="Index" class="btn btn-secondary">Odustani</a>
-    </form>
+
+<div class="page-header" style="background:linear-gradient(135deg,#dc3545,#b02a37)">
+    <h2><i class="bi bi-trash me-2"></i>Obriši Radnika</h2>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i><strong>Upozorenje!</strong> Ova akcija je trajna i ne može se poništiti.</div>
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white"><h6 class="mb-0">Podaci radnika koji se briše</h6></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Ime i Prezime</dt><dd class="col-sm-8 fw-bold">@Model.Ime @Model.Prezime</dd>
+                    <dt class="col-sm-4 text-muted">JMBG</dt><dd class="col-sm-8"><code>@Model.JMBG</code></dd>
+                    <dt class="col-sm-4 text-muted">Broj Ugovora</dt><dd class="col-sm-8">@(string.IsNullOrEmpty(Model.BrojUgovora) ? "—" : Model.BrojUgovora)</dd>
+                    <dt class="col-sm-4 text-muted">God. Iskustva</dt><dd class="col-sm-8">@Model.GodineRadnogIskustva</dd>
+                </dl>
+            </div>
+        </div>
+        <form asp-action="Delete" method="post" class="mt-3">
+            <input type="hidden" asp-for="Id" />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Potvrdi Brisanje</button>
+                <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-x me-1"></i>Odustani</a>
+            </div>
+        </form>
+    </div>
 </div>

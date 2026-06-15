@@ -1,36 +1,68 @@
-@model IEnumerable<PvcStolarija.DAL.Models.Reklamacija>
+@model IEnumerable<PvcStolarija.MVC.ViewModels.Reklamacija.ReklamacijaViewModel>
 @using PvcStolarija.DAL.Models
 @{ ViewData["Title"] = "Reklamacije"; }
 
-    <div class="page-header mb-0"><div>
+<div class="page-header">
+    <div>
         <h2><i class="bi bi-exclamation-triangle me-2"></i>Reklamacije</h2>
-        <a asp-action="Create" class="btn btn-primary">+ Nova Reklamacija</a>
+        <small class="opacity-75">Ukupno: @Model.Count() reklamacija</small>
     </div>
-    <div class="card shadow-sm"><div class="card-body">
-        @if(!Model.Any()){
-            <div class="text-center py-5"><p class="text-muted">Nema reklamacija.</p></div>
-        } else {
-        <div class="table-responsive"><table class="table table-hover align-middle"><thead class="table-dark">
-            <tr><th>Datum</th><th>Tip</th><th>Kupac</th><th>Radnik</th><th>Prioritet</th><th>Status</th><th>Proizvodi</th><th>Akcije</th></tr>
-        </thead><tbody>
-            @foreach(var r in Model){
-            var kupac=r.KupacReklamacije.FirstOrDefault()?.Kupac;
-            <tr>
-                <td>@r.Datum.ToString("dd.MM.yyyy")</td>
-                <td><span class="badge @(r.TipReklamacije==TipReklamacije.Pisana?"bg-info":"bg-warning text-dark")">@(r.TipReklamacije==TipReklamacije.Pisana?"📝 Pisana":"🔧 Terenska")</span></td>
-                <td>@(kupac!=null?$"{kupac.Ime} {kupac.Prezime}":"N/A")</td>
-                <td>@(r.Radnik!=null?$"{r.Radnik.Ime} {r.Radnik.Prezime}":"N/A")</td>
-                <td><strong class="@(r.Resena?"text-success":"text-danger")">@r.Prioritet</strong><span class="text-muted">/100</span></td>
-                <td><span class="badge @(r.Resena?"bg-success":"bg-danger")">@(r.Resena?"✓ Rešena":"✗ U toku")</span></td>
-                <td>@if(r.TipReklamacije==TipReklamacije.Terenska){<span class="badge bg-secondary">@r.ReklamacijaProizvodi.Count</span>}else{<span class="text-muted">-</span>}</td>
-                <td><div class="d-flex gap-1">
-                    <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-info btn-sm text-white">Detalji</a>
-                    <a asp-action="Edit" asp-route-id="@r.Id" class="btn btn-warning btn-sm">Izmeni</a>
-                    <a asp-action="Delete" asp-route-id="@r.Id" class="btn btn-danger btn-sm">Obriši</a>
-                </div></td>
-            </tr>
-            }
-        </tbody></table></div>
-        }
-    </div></div>
+    <a asp-action="Create" class="btn btn-light btn-sm"><i class="bi bi-plus-circle me-1"></i>Nova Reklamacija</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr><th>Datum</th><th>Tip</th><th>Kupac</th><th>Radnik</th><th>Prioritet</th><th>Status</th><th>Proizvodi</th><th>Akcije</th></tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="8" class="text-center py-4 text-muted"><i class="bi bi-inbox fs-4 d-block mb-2"></i>Nema reklamacija.</td></tr>
+                    }
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td>@r.Datum.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                @if (r.TipReklamacije == TipReklamacije.Pisana)
+                                { <span class="badge bg-info"><i class="bi bi-file-text me-1"></i>Pisana</span> }
+                                else
+                                { <span class="badge bg-warning text-dark"><i class="bi bi-tools me-1"></i>Terenska</span> }
+                            </td>
+                            <td>@(r.KupacImePrezime ?? "—")</td>
+                            <td>@(r.RadnikImePrezime ?? "—")</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress" style="width:60px;height:8px;">
+                                        <div class="progress-bar @(r.Resena ? "bg-success" : "bg-danger")" style="width:@r.Prioritet%"></div>
+                                    </div>
+                                    <span class="small @(r.Resena ? "text-success" : "text-danger") fw-bold">@r.Prioritet</span>
+                                </div>
+                            </td>
+                            <td>
+                                @if (r.Resena)
+                                { <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Rešena</span> }
+                                else
+                                { <span class="badge bg-danger"><i class="bi bi-clock me-1"></i>U toku</span> }
+                            </td>
+                            <td>
+                                @if (r.TipReklamacije == TipReklamacije.Terenska)
+                                { <span class="badge bg-secondary">@r.Proizvodi.Count</span> }
+                                else
+                                { <span class="text-muted">—</span> }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-outline-info btn-sm"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit"    asp-route-id="@r.Id" class="btn btn-outline-warning btn-sm"><i class="bi bi-pencil"></i></a>
+                                <a asp-action="Delete"  asp-route-id="@r.Id" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

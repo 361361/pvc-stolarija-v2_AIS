@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PvcStolarija.BLL.Interfaces;
 using PvcStolarija.DAL.Models;
 using PvcStolarija.MVC.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using PvcStolarija.MVC.ViewModels.Radnik;
 
 namespace PvcStolarija.MVC.Controllers
 {
@@ -17,41 +18,58 @@ namespace PvcStolarija.MVC.Controllers
             _fileUploadService = fileUploadService;
         }
 
+        // ── Mapiranje: Entity → ViewModel ──────────────────────
+        private static RadnikViewModel ToViewModel(Radnik r) => new()
+        {
+            Id = r.Id, Ime = r.Ime, Prezime = r.Prezime, JMBG = r.JMBG,
+            Telefon = r.Telefon, Email = r.Email,
+            BrojUgovora = r.BrojUgovora, GodineRadnogIskustva = r.GodineRadnogIskustva,
+            ProfilnaSlika = r.ProfilnaSlika
+        };
+
+        // ── Mapiranje: ViewModel → Entity ──────────────────────
+        private static Radnik ToEntity(RadnikViewModel vm) => new()
+        {
+            Id = vm.Id, Ime = vm.Ime, Prezime = vm.Prezime, JMBG = vm.JMBG,
+            Telefon = vm.Telefon, Email = vm.Email,
+            BrojUgovora = vm.BrojUgovora, GodineRadnogIskustva = vm.GodineRadnogIskustva,
+            ProfilnaSlika = vm.ProfilnaSlika
+        };
+
         public async Task<IActionResult> Index()
         {
             var radnici = await _radnikService.GetAllAsync();
-            return View(radnici);
+            var viewModels = radnici.Select(ToViewModel).ToList();
+            return View(viewModels);
         }
 
         public async Task<IActionResult> Details(int id)
         {
             var radnik = await _radnikService.GetByIdAsync(id);
             if (radnik == null) return NotFound();
-            return View(radnik);
+            return View(ToViewModel(radnik));
         }
 
         [Authorize(Roles = "Administrator")]
-        public IActionResult Create() => View();
+        public IActionResult Create() => View(new RadnikViewModel());
 
         [HttpPost]
         [Authorize(Roles = "Administrator")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Radnik radnik, IFormFile profilnaSlika)
+        public async Task<IActionResult> Create(RadnikViewModel vm)
         {
+            ModelState.Remove(nameof(vm.ProfilnaSlikaFajl));
+            if (!ModelState.IsValid) return View(vm);
             try
             {
-                ModelState.Clear();
-                if (profilnaSlika != null && profilnaSlika.Length > 0)
-                    radnik.ProfilnaSlika = await _fileUploadService.UploadImageAsync(profilnaSlika, "radnici");
-                await _radnikService.AddAsync(radnik);
-                TempData["SuccessMessage"] = $"Radnik {radnik.Ime} {radnik.Prezime} je uspešno dodat!";
+                if (vm.ProfilnaSlikaFajl != null && vm.ProfilnaSlikaFajl.Length > 0)
+                    vm.ProfilnaSlika = await _fileUploadService.UploadImageAsync(vm.ProfilnaSlikaFajl, "radnici");
+
+                await _radnikService.AddAsync(ToEntity(vm));
+                TempData["SuccessMessage"] = $"Radnik {vm.Ime} {vm.Prezime} je uspešno dodat!";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Greška: {ex.Message}";
-                return View(radnik);
-            }
+            catch (Exception ex) { TempData["ErrorMessage"] = $"Greška: {ex.Message}"; return View(vm); }
         }
 
         [Authorize(Roles = "Administrator")]
@@ -59,28 +77,30 @@ namespace PvcStolarija.MVC.Controllers
         {
             var radnik = await _radnikService.GetByIdAsync(id);
             if (radnik == null) { TempData["ErrorMessage"] = "Radnik nije pronađen."; return RedirectToAction(nameof(Index)); }
-            return View(radnik);
+            return View(ToViewModel(radnik));
         }
 
         [HttpPost]
         [Authorize(Roles = "Administrator")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Radnik radnik, IFormFile profilnaSlika)
+        public async Task<IActionResult> Edit(int id, RadnikViewModel vm)
         {
-            if (id != radnik.Id) { TempData["ErrorMessage"] = "Neispravni podaci."; return RedirectToAction(nameof(Index)); }
+            if (id != vm.Id) { TempData["ErrorMessage"] = "Neispravni podaci."; return RedirectToAction(nameof(Index)); }
+            ModelState.Remove(nameof(vm.ProfilnaSlikaFajl));
+            if (!ModelState.IsValid) return View(vm);
             try
             {
-                if (profilnaSlika != null && profilnaSlika.Length > 0)
+                if (vm.ProfilnaSlikaFajl != null && vm.ProfilnaSlikaFajl.Length > 0)
                 {
-                    if (!string.IsNullOrEmpty(radnik.ProfilnaSlika))
-                        await _fileUploadService.DeleteImageAsync(radnik.ProfilnaSlika);
-                    radnik.ProfilnaSlika = await _fileUploadService.UploadImageAsync(profilnaSlika, "radnici");
+                    if (!string.IsNullOrEmpty(vm.ProfilnaSlika))
+                        await _fileUploadService.DeleteImageAsync(vm.ProfilnaSlika);
+                    vm.ProfilnaSlika = await _fileUploadService.UploadImageAsync(vm.ProfilnaSlikaFajl, "radnici");
                 }
-                await _radnikService.UpdateAsync(radnik);
-                TempData["SuccessMessage"] = $"Radnik {radnik.Ime} {radnik.Prezime} je uspešno izmenjen!";
+                await _radnikService.UpdateAsync(ToEntity(vm));
+                TempData["SuccessMessage"] = $"Radnik {vm.Ime} {vm.Prezime} je uspešno izmenjen!";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex) { TempData["ErrorMessage"] = $"Greška: {ex.Message}"; return View(radnik); }
+            catch (Exception ex) { TempData["ErrorMessage"] = $"Greška: {ex.Message}"; return View(vm); }
         }
 
         [Authorize(Roles = "Administrator")]
@@ -88,7 +108,7 @@ namespace PvcStolarija.MVC.Controllers
         {
             var radnik = await _radnikService.GetByIdAsync(id);
             if (radnik == null) return NotFound();
-            return View(radnik);
+            return View(ToViewModel(radnik));
         }
 
         [HttpPost, ActionName("Delete")]

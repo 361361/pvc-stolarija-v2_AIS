@@ -1,29 +1,38 @@
-@model PvcStolarija.DAL.Models.Proizvod
+@model PvcStolarija.MVC.ViewModels.Proizvod.ProizvodViewModel
 @using PvcStolarija.DAL.Models
 @{ ViewData["Title"] = "Obriši Proizvod"; }
-<div>
-    <div class="page-header mb-4" style="background:linear-gradient(135deg,#dc3545,#b02a37)"><h2>Obriši Proizvod</h1>
-    <div class="alert alert-warning">
-        <strong>Upozorenje!</strong> Da li ste sigurni da želite obrisati ovaj proizvod?
-        @if (Model.Slike?.Any() == true)
-        {
-            <br />
-            <strong>Napomena:</strong>
-            <text>Bice obrisano i </text>@Model.Slike.Count<text> slika.</text>
-        }
+
+<div class="page-header" style="background:linear-gradient(135deg,#dc3545,#b02a37)">
+    <h2><i class="bi bi-trash me-2"></i>Obriši Proizvod</h2>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i><strong>Upozorenje!</strong> Ova akcija je trajna.
+            @if (Model.Slike.Any())
+            {
+                <br /><small>Biće obrisano i <strong>@Model.Slike.Count</strong> slika.</small>
+            }
+        </div>
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white"><h6 class="mb-0">Podaci proizvoda koji se briše</h6></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Naziv</dt><dd class="col-sm-8 fw-bold">@Model.Naziv</dd>
+                    <dt class="col-sm-4 text-muted">Model</dt><dd class="col-sm-8">@Model.Model</dd>
+                    <dt class="col-sm-4 text-muted">Šifra</dt><dd class="col-sm-8"><span class="badge bg-primary">@Model.Sifra</span></dd>
+                    <dt class="col-sm-4 text-muted">Materijal</dt><dd class="col-sm-8">@Model.TipMaterijala</dd>
+                    <dt class="col-sm-4 text-muted">Dostupnost</dt><dd class="col-sm-8">@Model.Dostupnost</dd>
+                </dl>
+            </div>
+        </div>
+        <form asp-action="Delete" method="post" class="mt-3">
+            <input type="hidden" asp-for="Id" />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Potvrdi Brisanje</button>
+                <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-x me-1"></i>Odustani</a>
+            </div>
+        </form>
     </div>
-    <div class="row"><div class="col-md-8">
-        <div class="card"><div class="card-header bg-danger text-white"><h5 class="mb-0">Podaci proizvoda</h5></div>
-        <div class="card-body"><dl class="row">
-            <dt class="col-sm-4">Naziv</dt><dd class="col-sm-8">@Model.Naziv</dd>
-            <dt class="col-sm-4">Model</dt><dd class="col-sm-8">@Model.Model</dd>
-            <dt class="col-sm-4">Šifra</dt><dd class="col-sm-8">@Model.Sifra</dd>
-            <dt class="col-sm-4">Tip Materijala</dt><dd class="col-sm-8">@Model.TipMaterijala</dd>
-            <dt class="col-sm-4">Dostupnost</dt><dd class="col-sm-8">@Model.Dostupnost</dd>
-        </dl></div></div>
-    </div></div>
-    <form asp-action="Delete" method="post" class="mt-3"><input type="hidden" asp-for="Id" />
-        <button type="submit" class="btn btn-danger">Potvrdi Brisanje</button>
-        <a asp-action="Index" class="btn btn-secondary">Odustani</a>
-    </form>
 </div>
